@@ -1,13 +1,13 @@
 import { Request, Response } from 'express';
-import { signUpUser, signInUser, verifyOtpUser } from '../services/auth.service';
+import { signUpUser, signInUser, verifyOtpUser, resendOtpUser } from '../services/auth.service';
 import { generateToken } from '../utils/jwt';
 
 export const signUp = async (req: Request, res: Response) => {
   try {
-    const { email, password, fullName } = req.body;
-    console.log(`[AUTH] Attempting signup for: ${email}`);
+    const { email, password, fullName, role, adminSecret } = req.body;
+    console.log(`[AUTH] Attempting signup for: ${email} as ${role || 'customer'}`);
 
-    const data = await signUpUser(email, password, fullName);
+    const data = await signUpUser(email, password, fullName, role, adminSecret);
 
     console.log(`[AUTH] Signup successful for: ${email}. OTP sent.`);
     res.status(201).json({
@@ -30,6 +30,7 @@ export const verifyOTP = async (req: Request, res: Response) => {
     const token = generateToken({
       userId: data.user?.id,
       email: data.user?.email,
+      role: data.user?.user_metadata?.role || 'customer',
     });
 
     console.log(`[AUTH] OTP verified successfully for: ${email}`);
@@ -44,6 +45,21 @@ export const verifyOTP = async (req: Request, res: Response) => {
   }
 };
 
+export const resendOTP = async (req: Request, res: Response) => {
+  try {
+    const { email } = req.body;
+    console.log(`[AUTH] Resending OTP for: ${email}`);
+
+    await resendOtpUser(email);
+
+    console.log(`[AUTH] OTP resent successfully for: ${email}`);
+    res.json({ message: 'OTP resent successfully' });
+  } catch (err: any) {
+    console.error(`[AUTH ERROR] Resend failed for ${req.body.email}: ${err.message}`);
+    res.status(400).json({ error: err.message });
+  }
+};
+
 export const signIn = async (req: Request, res: Response) => {
   try {
     const { email, password } = req.body;
@@ -54,6 +70,7 @@ export const signIn = async (req: Request, res: Response) => {
     const token = generateToken({
       userId: data.user?.id,
       email: data.user?.email,
+      role: data.user?.user_metadata?.role || 'customer',
     });
 
     console.log(`[AUTH] Signin successful for: ${email}`);
