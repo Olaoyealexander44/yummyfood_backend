@@ -3,7 +3,7 @@ import { supabase } from '../config/supabaseClient';
 
 export const submitPayment = async (req: Request, res: Response) => {
   try {
-    const { name, email, orderId, total, orders } = req.body;
+    const { name, email, address, orderId, total, orders } = req.body;
     const file = req.file;
     // Get userId if the user is signed in (optional)
     const userId = (req as any).user?.userId || null;
@@ -54,6 +54,7 @@ export const submitPayment = async (req: Request, res: Response) => {
         order_id: String(orderId),
         full_name: name,
         email: email,
+        delivery_address: address,
         amount: parseFloat(total),
         order_summary: typeof orders === 'string' ? JSON.parse(orders) : orders,
         receipt_url: publicUrl,
@@ -76,6 +77,7 @@ export const submitPayment = async (req: Request, res: Response) => {
         items: typeof orders === 'string' ? JSON.parse(orders) : orders,
         total_amount: parseFloat(total),
         receipt_url: publicUrl,
+        delivery_address: address,
         status: 'awaiting_confirmation',
         created_at: new Date().toISOString()
       }, { onConflict: 'id' });

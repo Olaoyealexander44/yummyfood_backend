@@ -69,3 +69,42 @@ export const getAllOrders = async (req: Request, res: Response) => {
     res.status(500).json({ error: err.message });
   }
 };
+
+export const updateOrderStatus = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const { status } = req.body; // Expected: 'confirmed' | 'cancelled'
+
+    if (!['confirmed', 'cancelled'].includes(status)) {
+      return res.status(400).json({ error: 'Invalid status. Must be "confirmed" or "cancelled".' });
+    }
+
+    const { data, error } = await supabase
+      .from('orders')
+      .update({ status })
+      .eq('id', id)
+      .select()
+      .single();
+
+    if (error) throw error;
+    if (!data) return res.status(404).json({ error: 'Order not found.' });
+
+    // Sync with payments table if it exists
+    console.log(`[ADMIN] Syncing status with payments table for Order ID: ${id}...`);
+    const { error: paymentError } = await supabase
+      .from('payments')
+      .update({ status })
+      .eq('order_id', String(id));
+
+    if (paymentError) {
+      console.warn(`[ADMIN WARNING] Failed to sync status with payments table: ${paymentError.message}`);
+      // We don't throw here to ensure the order update is still considered successful
+    }
+
+    console.log(`[ADMIN] Order #${id} has been ${status}.`);
+    res.json(data);
+  } catch (err: any) {
+    console.error(`[ADMIN ERROR] Failed to update order status: ${err.message}`);
+    res.status(500).json({ error: err.message });
+  }
+};
