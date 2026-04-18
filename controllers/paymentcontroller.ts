@@ -92,7 +92,11 @@ export const submitPayment = async (req: Request, res: Response) => {
 
   } catch (err: any) {
     console.error(`[PAYMENT ERROR] Submission failed: ${err.message}`);
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ 
+      error: 'Failed to submit payment proof', 
+      details: err.message,
+      code: err.code 
+    });
   }
 };
 
