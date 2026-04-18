@@ -113,3 +113,40 @@ export const updateOrderStatus = async (req: Request, res: Response) => {
     res.status(500).json({ error: err.message });
   }
 };
+
+export const trackOrder = async (req: Request, res: Response) => {
+  try {
+    const { id, email } = req.params;
+    console.log(`[ORDER] Guest tracking attempt for Order ID: ${id}, Email: ${email}`);
+
+    // 1. Find the payment record to verify email ownership
+    const { data: payment, error: paymentError } = await supabase
+      .from('payments')
+      .select('order_id')
+      .eq('order_id', id)
+      .eq('email', email)
+      .single();
+
+    if (paymentError || !payment) {
+      console.warn(`[ORDER] Tracking failed: No payment match for ${id} and ${email}`);
+      return res.status(404).json({ error: 'Order not found or email mismatch.' });
+    }
+
+    // 2. Fetch the actual order details
+    const { data: order, error: orderError } = await supabase
+      .from('orders')
+      .select('*')
+      .eq('id', id)
+      .single();
+
+    if (orderError || !order) {
+      throw new Error(orderError?.message || 'Order details not found');
+    }
+
+    console.log(`[ORDER] Tracking success for Order ID: ${id}`);
+    res.json(order);
+  } catch (err: any) {
+    console.error(`[ORDER ERROR] Tracking failed: ${err.message}`);
+    res.status(500).json({ error: 'Failed to track order' });
+  }
+};
