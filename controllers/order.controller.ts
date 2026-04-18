@@ -40,15 +40,20 @@ export const getUserOrders = async (req: Request, res: Response) => {
       .order('created_at', { ascending: false });
 
     if (error) {
-      console.error(`[ORDER ERROR] Database query failed: ${error.message}`);
+      console.error(`[DATABASE ERROR] Supabase query failed: ${error.message}`);
       throw error;
     }
 
-    console.log(`[ORDER] Found ${data?.length || 0} orders for user: ${userId}`);
-    res.json(data);
+    const orders = data || [];
+    console.log(`[ORDER] Found ${orders.length} orders for user: ${userId}`);
+    res.json(orders);
   } catch (err: any) {
     console.error(`[ORDER ERROR] History fetch failed: ${err.message}`);
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ 
+      error: 'Failed to fetch user history', 
+      details: err.message,
+      code: err.code 
+    });
   }
 };
 

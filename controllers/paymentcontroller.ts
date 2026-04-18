@@ -104,12 +104,20 @@ export const getAllPayments = async (req: Request, res: Response) => {
       .select('*')
       .order('created_at', { ascending: false });
 
-    if (error) throw error;
+    if (error) {
+      console.error(`[DATABASE ERROR] Supabase query failed: ${error.message}`);
+      throw error;
+    }
 
-    console.log(`[ADMIN] Successfully fetched ${data.length} records`);
-    res.json(data);
+    const records = data || [];
+    console.log(`[ADMIN] Successfully fetched ${records.length} records`);
+    res.json(records);
   } catch (err: any) {
     console.error(`[ADMIN ERROR] Failed to fetch payments: ${err.message}`);
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ 
+      error: 'Failed to fetch payments', 
+      details: err.message,
+      code: err.code 
+    });
   }
 };
