@@ -65,6 +65,28 @@ export const resendOtpUser = async (email: string) => {
   return data;
 };
 
+export const forgotPasswordUser = async (email: string) => {
+  const { data, error } = await supabase.auth.resetPasswordForEmail(email);
+  if (error) throw error;
+  return data;
+};
+
+export const resetPasswordUser = async (email: string, otp: string, password: string) => {
+  const { data: verifyData, error: verifyError } = await supabase.auth.verifyOtp({
+    email,
+    token: otp,
+    type: 'recovery',
+  });
+  if (verifyError) throw verifyError;
+
+  const { data: updateData, error: updateError } = await supabase.auth.updateUser({
+    password,
+  });
+  if (updateError) throw updateError;
+
+  return { verifyData, updateData };
+};
+
 export const signInUser = async (email: string, password: string) => {
   const { data, error } = await supabase.auth.signInWithPassword({
     email,

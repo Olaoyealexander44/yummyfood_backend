@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { signUpUser, signInUser, verifyOtpUser, resendOtpUser } from '../services/auth.service';
+import { signUpUser, signInUser, verifyOtpUser, resendOtpUser, forgotPasswordUser, resetPasswordUser } from '../services/auth.service';
 import { generateToken } from '../utils/jwt';
 
 export const signUp = async (req: Request, res: Response) => {
@@ -16,6 +16,26 @@ export const signUp = async (req: Request, res: Response) => {
     });
   } catch (err: any) {
     console.error(`[AUTH ERROR] Signup failed for ${req.body.email}: ${err.message}`);
+    res.status(400).json({ error: err.message });
+  }
+};
+
+export const forgotPassword = async (req: Request, res: Response) => {
+  try {
+    const { email } = req.body;
+    await forgotPasswordUser(email);
+    res.json({ message: 'Password reset code sent to your email.' });
+  } catch (err: any) {
+    res.status(400).json({ error: err.message });
+  }
+};
+
+export const resetPassword = async (req: Request, res: Response) => {
+  try {
+    const { email, otp, password } = req.body;
+    await resetPasswordUser(email, otp, password);
+    res.json({ message: 'Password updated successfully.' });
+  } catch (err: any) {
     res.status(400).json({ error: err.message });
   }
 };
