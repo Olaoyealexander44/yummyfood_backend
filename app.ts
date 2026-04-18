@@ -6,7 +6,15 @@ import orderRoutes from './routes/order.routes';
 
 const app = express();
 
-app.use(cors());
+// Update CORS to allow requests from local and Vercel frontend
+app.use(cors({
+  origin: [
+    'http://localhost:5173',
+    'http://localhost:3000',
+    'https://yummyfood-frontend.vercel.app'
+  ],
+  credentials: true
+}));
 app.use(express.json());
 
 app.use('/api/auth', authRoutes);
