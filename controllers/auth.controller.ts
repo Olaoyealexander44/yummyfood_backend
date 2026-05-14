@@ -1,4 +1,5 @@
 import { Request, Response } from 'express';
+import { supabase } from '../config/supabaseClient';
 import { signUpUser, signInUser, verifyOtpUser, resendOtpUser, forgotPasswordUser, resetPasswordUser } from '../services/auth.service';
 import { generateToken } from '../utils/jwt';
 
@@ -102,5 +103,39 @@ export const signIn = async (req: Request, res: Response) => {
   } catch (err: any) {
     console.error(`[AUTH ERROR] Signin failed for ${req.body.email}: ${err.message}`);
     res.status(400).json({ error: err.message });
+  }
+};
+
+export const getUserCount = async (req: Request, res: Response) => {
+  try {
+    const { count: total, error: totalError } = await supabase
+      .from('profiles')
+      .select('id', { count: 'exact', head: true });
+
+    if (totalError) {
+      return res.status(500).json({ error: totalError.message });
+    }
+
+    const { count: customers, error: customersError } = await supabase
+      .from('profiles')
+      .select('id', { count: 'exact', head: true })
+      .eq('role', 'customer');
+
+    if (customersError) {
+      return res.status(500).json({ error: customersError.message });
+    }
+
+    const { count: admins, error: adminsError } = await supabase
+      .from('profiles')
+      .select('id', { count: 'exact', head: true })
+      .eq('role', 'admin');
+
+    if (adminsError) {
+      return res.status(500).json({ error: adminsError.message });
+    }
+
+    res.json({ total: total ?? 0, customers: customers ?? 0, admins: admins ?? 0 });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
   }
 };
