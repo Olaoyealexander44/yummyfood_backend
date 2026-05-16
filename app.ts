@@ -12,7 +12,9 @@ app.use(cors({
   origin: [
     'http://localhost:5173',
     'http://localhost:3000',
-    'https://yummyfood-frontend.vercel.app'
+    'https://yummyfood-frontend.vercel.app',
+    'https://www.yummyfood.it.com',
+    'https://yummyfood.it.com'
   ],
   credentials: true
 }));
