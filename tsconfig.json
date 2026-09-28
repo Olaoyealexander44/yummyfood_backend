@@ -1,0 +1,49 @@
+{
+  // Visit https://aka.ms/tsconfig to read more about this file
+  "compilerOptions": {
+    // Environment / Module Settings
+    "target": "ES2022",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "moduleDetection": "force",
+    "esModuleInterop": true,
+    "isolatedModules": true,
+    "verbatimModuleSyntax": true,
+    "noUncheckedSideEffectImports": true,
+
+    // File Layout
+    "rootDir": "./src",
+    "outDir": "./dist",
+
+    // Type Checking
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "exactOptionalPropertyTypes": true,
+
+    // Output Generation
+    "sourceMap": true,
+    "declaration": true,
+    "declarationMap": true,
+
+    // JSX
+    "jsx": "react-jsx",
+
+    // Types
+    "types": [],
+    // For nodejs, uncomment below and run: npm install -D @types/node
+    // "lib": ["esnext"],
+    // "types": ["node"],
+
+    // Compatibility
+    "skipLibCheck": true
+
+    // Additional strictness options (uncomment as needed):
+    // "noImplicitReturns": true,
+    // "noImplicitOverride": true,
+    // "noUnusedLocals": true,
+    // "noUnusedParameters": true,
+    // "noFallthroughCasesInSwitch": true,
+    // "noPropertyAccessFromIndexSignature": true
+  },
+  "include": ["src"]
+}
